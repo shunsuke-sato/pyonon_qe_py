@@ -59,11 +59,25 @@ def read_dynamical_matrix(filename):
 
     # Read the atom information
     atom2elem = np.zeros(natoms, dtype=int)
-    atom_red_coor = np.zeros((natoms, 3))
+
+    atom_alat_coor = np.zeros((natoms, 3))
     for i in range(natoms):
         icount += 1
         atom2elem[i] = int(lines[icount].split()[1])
-        atom_red_coor[i, 0:3] = lines[icount].split()[2:5]
+        atom_alat_coor[i, 0:3] = lines[icount].split()[2:5]
+
+    atom_alat_coor = atom_alat_coor*lattice_const
+
+    # Convert from Cartecian to Reduced coordinates
+    atom_red_coor = np.zeros((natoms, 3))
+    b_vec = np.linalg.inv(a_vec)
+    vec_in = np.zeros(3)
+    vec_out = np.zeros(3)
+    
+    for iatom in range(natoms):
+        vec_in[0:3] = atom_alat_coor[iatom,0:3]
+        vec_out = np.matmul(b_vec, vec_in)
+        atom_red_coor[iatom,0:3] = vec_out[0:3]
 
     matrix_size = 3 * natoms
         
