@@ -136,22 +136,25 @@ def wigner_distribution(phonon_frequencies,phonon_modes,nelements,natoms,mass_el
     for ifile in range(num_file):
 
         drion_sec = np.zeros(3*natoms)
+        xrand_vec = np.random.normal(loc=0.0, scale=1.0, size=3*natoms)
+        xrand_vec[0:3] = 0.0
+
         for imode in range(0+3,3*natoms):
             sigma = 2.0*phonon_frequencies[imode]*np.tanh(beta*phonon_frequencies[imode]/2.0)
             sigma = 1.0/np.sqrt(sigma)
+            xrand_vec[imode] = xrand_vec[imode]*sigma
 
-            xrand_vec = np.random.normal(loc=0.0, scale=sigma, size=3*natoms)
-            vec_t = np.matmul(phonon_modes, xrand_vec)
 
-            icount = -1
-            for iatom in range(natoms):
-                ielem = atom2elem[iatom]-1
-                mass = mass_elem[ielem]
-                for i in range(3):
-                    icount += 1
-                    vec_t[icount] = vec_t[icount]/np.sqrt(mass)
+        vec_t = np.matmul(phonon_modes, xrand_vec)
+        icount = -1
+        for iatom in range(natoms):
+            ielem = atom2elem[iatom]-1
+            mass = mass_elem[ielem]
+            for i in range(3):
+                icount += 1
+                vec_t[icount] = vec_t[icount]/np.sqrt(mass)
 
-            drion_sec += np.real(vec_t)
+        drion_sec = np.real(vec_t)
 
         drion = np.zeros((natoms,3))
         icount = -1
